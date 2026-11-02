@@ -21,7 +21,7 @@ jobs:
       - run: npm install
       - run: npm run build
         env:
-          VITE_AGENT_API: ${{ vars.AGENT_API_URL }}
+          VITE_AGENT_API: ${{ vars.AGENT_API_URL || 'https://agent-foundry-api-cnhf.onrender.com' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
