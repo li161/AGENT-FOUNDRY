@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Personal Agent",
+  "version": "0.1.0",
+  "identifier": "com.ciqu.personalagent",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [{ "title": "Personal Agent", "width": 1180, "height": 780, "minWidth": 760, "minHeight": 560 }],
+    "security": { "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost https: http://localhost:* http://127.0.0.1:*; img-src 'self' asset: http://asset.localhost data: blob:;" }
+  },
+  "bundle": { "active": true, "targets": "all", "icon": [] }
+}
