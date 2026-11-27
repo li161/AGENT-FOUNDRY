@@ -115,3 +115,50 @@ The TypeScript source, compiled-JavaScript build path, bundle patch, and CI type
 The exact pinned Harness checkout, TypeScript build, PostgreSQL integration,
 and live model tool-call acceptance test still need to run before this can be
 called fully verified.
+
+
+## Personal Agent conversation storage and sync MVP
+
+This branch now includes a durable conversation schema and an authenticated sync API.
+
+### Apply migrations
+
+Run the existing memory/task migration, then the new conversation schema:
+
+```bash
+psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/001_init.sql
+psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/002_conversations_sync.sql
+```
+
+The desktop client schema is in `dsh-plugin/sql/003_local_sqlite.sql`. Configure SQLite with WAL mode and foreign keys enabled. The local outbox stores unsynced mutations; only remove an outbox item after the server acknowledges it.
+
+### Start the sync API
+
+Copy `dsh-plugin/.env.sync.example` to the repository root `.env`, fill in a stable user ID, a long random bearer token and a PostgreSQL URL, then run:
+
+```bash
+npm run sync-api
+```
+
+The sync service listens on port 8788 by default. Keep it behind HTTPS and never expose the bearer token in browser source code. The current MVP uses one trusted user identity configured by the server; it is not a public multi-tenant authentication system.
+
+### API surface
+
+- `POST /v1/devices/register` — register a device ID.
+- `POST /v1/conversations` — create/update a conversation.
+- `POST /v1/messages` — persist a message and optional parts.
+- `POST /v1/runs` — persist an Agent run/checkpoint.
+- `POST /v1/sync/push` — upload local conversation/message changes.
+- `GET /v1/sync/pull?deviceId=...&after=0&limit=200` — fetch incremental remote changes.
+- `GET /v1/conversations/:id/messages` — page through a conversation's messages.
+
+### Persistence and recovery contract
+
+1. Commit the user message to local SQLite and insert an outbox row in the same SQLite transaction before starting any model request.
+2. Create the assistant message locally with `pending` status before calling the provider.
+3. Persist every received stream chunk to the local message row (batch small chunks, e.g. 100–250 ms); mark it `completed` only after the provider finishes.
+4. Persist Agent run state/checkpoints and tool events before/after side effects.
+5. On startup, inspect `pending`/`streaming` messages and `queued`/`running` runs. Mark stale streams `interrupted`; resume only tasks whose checkpoint and tool idempotency policy make replay safe.
+6. Retry the local outbox with exponential backoff. Keep the same entity IDs across retries. Advance the pull cursor only after all received changes have been committed locally.
+
+The sync feed is append-only. Conflicting edits are retained as versioned server changes; a later client should surface conflicts rather than silently overwriting divergent edits. Attachments should be uploaded as encrypted blobs separately; message parts store metadata and local/remote references, not raw binary payloads.
