@@ -1,27 +1,29 @@
+import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import type { Message } from './db'
-export async function* streamChat(endpoint: string, apiKey: string, model: string, messages: Message[], signal: AbortSignal) {
-  const localHost = (() => { try { const host = new URL(endpoint).hostname; return host === 'localhost' || host === '127.0.0.1' || host === '::1' } catch { return false } })()
+
+interface StreamEvent { requestId: string; token?: string; done?: boolean }
+export async function* streamChat(endpoint: string, apiKey: string, model: string, messages: Message[]) {
+  const localHost = (() => { try { const host = new URL(endpoint).hostname; return host === 'localhost' || host === '127.0.0.1' || host === '[::1]' } catch { return false } })()
   if (!apiKey.trim() && !localHost) throw new Error('云端模型需要 API Key；本地 Ollama 地址可以留空')
-  const headers: Record<string,string> = { 'Content-Type':'application/json' }
-  if (apiKey.trim()) headers.Authorization = `Bearer ${apiKey}`
-  const response=await fetch(endpoint,{method:'POST',signal,headers,
-    body:JSON.stringify({model,stream:true,messages:messages.map(m=>({role:m.role,content:m.content}))})})
-  if(!response.ok) throw new Error(`模型请求失败 (${response.status}): ${(await response.text()).slice(0,500)}`)
-  if(!response.body) throw new Error('当前响应不支持流式读取')
-  const reader=response.body.getReader(),decoder=new TextDecoder()
-  let buffer=''
-  while(true){
-    const {value,done}=await reader.read()
-    if(done)break
-    buffer+=decoder.decode(value,{stream:true})
-    const lines=buffer.split('\n');buffer=lines.pop()||''
-    for(const line of lines){
-      const trimmed=line.trim()
-      if(!trimmed.startsWith('data:'))continue
-      const data=trimmed.slice(5).trim()
-      if(data==='[DONE]')return
-      try{const json=JSON.parse(data);const delta=json.choices?.[0]?.delta?.content;if(typeof delta==='string'&&delta)yield delta}
-      catch(error){if(error instanceof SyntaxError)continue;throw error}
+  const requestId=crypto.randomUUID(),queue:string[]=[]
+  let done=false,failure:unknown=null,wake:(()=>void)|null=null
+  const unlisten=await listen<StreamEvent>('model-stream',event=>{
+    if(event.payload.requestId!==requestId)return
+    if(event.payload.token)queue.push(event.payload.token)
+    if(event.payload.done)done=true
+    wake?.();wake=null
+  })
+  const request=invoke<void>('chat_stream',{
+    requestId,endpoint,apiKey,model,
+    messages:messages.map(m=>({role:m.role,content:m.content}))
+  }).then(()=>{done=true;wake?.();wake=null}).catch(error=>{failure=error;done=true;wake?.();wake=null})
+  try{
+    while(!done||queue.length){
+      if(queue.length){yield queue.shift()!;continue}
+      await new Promise<void>(resolve=>{wake=resolve})
     }
-  }
+    if(failure)throw new Error(String(failure))
+    await request
+  }finally{unlisten()}
 }
