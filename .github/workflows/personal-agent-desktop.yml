@@ -1,0 +1,35 @@
+name: Personal Agent Desktop
+on:
+  push:
+    branches: [demo/deepseek-harness-personal-agent]
+    paths:
+      - 'personal-agent-desktop/**'
+      - '.github/workflows/personal-agent-desktop.yml'
+  pull_request:
+    paths:
+      - 'personal-agent-desktop/**'
+      - '.github/workflows/personal-agent-desktop.yml'
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: personal-agent-desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run build
+  native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tauri Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check native desktop runtime
+        run: cargo check --manifest-path personal-agent-desktop/src-tauri/Cargo.toml

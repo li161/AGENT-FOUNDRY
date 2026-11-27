@@ -1,0 +1,25 @@
+name: Personal Agent Sync API checks
+on:
+  push:
+    branches:
+      - demo/deepseek-harness-personal-agent
+    paths:
+      - 'services/personal-agent-sync.mjs'
+      - 'dsh-plugin/sql/**'
+      - 'package.json'
+      - '.github/workflows/personal-agent-sync.yml'
+  pull_request:
+    paths:
+      - 'services/personal-agent-sync.mjs'
+      - 'dsh-plugin/sql/**'
+      - 'package.json'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --check services/personal-agent-sync.mjs
+      - run: node --check services/api/server.mjs

@@ -1,0 +1,11 @@
+PRAGMA foreign_keys = ON;
+CREATE TABLE IF NOT EXISTS local_meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS local_conversations(id TEXT PRIMARY KEY,title TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'active',metadata TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,dirty INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS local_messages(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL REFERENCES local_conversations(id),parent_message_id TEXT,role TEXT NOT NULL,content TEXT NOT NULL DEFAULT '',status TEXT NOT NULL,model TEXT,provider TEXT,metadata TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,completed_at TEXT,dirty INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX IF NOT EXISTS local_messages_order ON local_messages(conversation_id,created_at,id);
+CREATE TABLE IF NOT EXISTS local_message_parts(id TEXT PRIMARY KEY,message_id TEXT NOT NULL REFERENCES local_messages(id) ON DELETE CASCADE,part_index INTEGER NOT NULL,part_type TEXT NOT NULL,content TEXT,mime_type TEXT,file_name TEXT,file_path TEXT,remote_url TEXT,metadata TEXT NOT NULL DEFAULT '{}',UNIQUE(message_id,part_index));
+CREATE TABLE IF NOT EXISTS local_agent_runs(id TEXT PRIMARY KEY,conversation_id TEXT NOT NULL,trigger_message_id TEXT,status TEXT NOT NULL,state TEXT NOT NULL DEFAULT '{}',checkpoint TEXT NOT NULL DEFAULT '{}',attempt INTEGER NOT NULL DEFAULT 0,heartbeat_at TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL,dirty INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS local_tool_events(id TEXT PRIMARY KEY,run_id TEXT,message_id TEXT,tool_name TEXT NOT NULL,status TEXT NOT NULL,input TEXT NOT NULL DEFAULT '{}',output TEXT,error TEXT,started_at TEXT NOT NULL,completed_at TEXT);
+CREATE TABLE IF NOT EXISTS local_outbox(id TEXT PRIMARY KEY,entity_type TEXT NOT NULL,entity_id TEXT NOT NULL,operation TEXT NOT NULL,payload TEXT NOT NULL,created_at TEXT NOT NULL,attempts INTEGER NOT NULL DEFAULT 0,last_error TEXT);
+CREATE INDEX IF NOT EXISTS local_outbox_created ON local_outbox(created_at);
+CREATE TABLE IF NOT EXISTS local_sync_state(key TEXT PRIMARY KEY,value TEXT NOT NULL);

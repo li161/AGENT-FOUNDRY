@@ -45,3 +45,10 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r training/requirements.txt
 python training/train_sft.py --input ./foundry-sft.jsonl --output ./artifacts/student-v1
 ```
+
+
+## Portable Personal Agent (desktop MVP)
+
+A separate desktop client is being developed in `personal-agent-desktop/`. It is an independent Tauri + Vue app, not a ChatGPT web wrapper. It stores conversations in local SQLite first, calls an OpenAI-compatible model endpoint for inference, and can optionally synchronize through the Personal Agent Sync API.
+
+See [desktop setup and architecture](./personal-agent-desktop/README.md).
