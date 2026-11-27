@@ -1,0 +1,26 @@
+name: Personal Agent Desktop
+on:
+  push:
+    branches: [demo/deepseek-harness-personal-agent]
+    paths:
+      - 'personal-agent-desktop/**'
+      - '.github/workflows/personal-agent-desktop.yml'
+  pull_request:
+    paths:
+      - 'personal-agent-desktop/**'
+      - '.github/workflows/personal-agent-desktop.yml'
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: personal-agent-desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: personal-agent-desktop/package-lock.json
+      - run: npm install
+      - run: npm run build
