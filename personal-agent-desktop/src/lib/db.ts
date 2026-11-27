@@ -80,7 +80,7 @@ export async function setMeta(key: string,value: string) {
   await (await db()).execute('INSERT INTO local_meta(key,value) VALUES($1,$2) ON CONFLICT(key) DO UPDATE SET value=excluded.value',[key,value])
 }
 export async function outboxBatch(limit=50) {
-  return (await (await db()).select<{id:string;entity_type:string;entity_id:string;operation:string;payload:string;attempts:number}[]>('SELECT * FROM local_outbox ORDER BY created_at LIMIT $1',[limit]))
+  return (await (await db()).select<{id:string;entity_type:string;entity_id:string;operation:string;payload:string;attempts:number}[]>('SELECT * FROM local_outbox ORDER BY rowid LIMIT $1',[limit]))
 }
 export async function deleteOutbox(ids: string[]) {
   const d=await db()
