@@ -48,10 +48,9 @@ optional `inject`, and `apply(ctx)`. Tool registration uses the official
 1. Put this directory inside a DeepSeek Harness source checkout, or expose it to
    that checkout as a local workspace package.
 2. Make `pg` resolvable from the Harness host process.
-3. Add the plugin row to the selected profile's `cordis.patch.yml`. The file
-   `cordis.patch.example.yml` is an illustrative row; plugin row fields can vary
-   by profile/revision, so copy the shape from that checkout's existing plugin
-   rows rather than assuming it is universally valid.
+3. Install/link this package into the profile using the Harness plugin/bundle workflow.
+   Its `package.json` declares a `dsh.bundle`; its `cordis.patch.example.yml` uses
+   the official insert-layer shape. Pin the Harness version before installing.
 4. Start the Harness Web profile and open a session.
 5. Ask the agent to save a preference, list tasks, or create a task.
 
