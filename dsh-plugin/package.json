@@ -8,5 +8,20 @@
     "@deepseek-ai/cordis": "workspace:*",
     "@deepseek-ai/dsh-tools": "workspace:*",
     "pg": "^8.13.1"
+  },
+  "main": "src/index.ts",
+  "files": [
+    "src/index.ts",
+    "cordis.patch.yml",
+    "README.md",
+    "sql/001_init.sql"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "dsh": ">=0.2.0-alpha.0"
   }
 }
