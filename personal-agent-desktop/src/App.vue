@@ -22,6 +22,7 @@ async function send(){
  draft.value='';error.value='';messages.value.push(user)
  // Durability boundary: commit user input before any network/model request.
  await saveMessage(user)
+ if(settings.value.syncUrl) void syncNow(settings.value.syncUrl,settings.value.syncToken)
  const assistant:Message={id:newId(),conversation_id:conversationId,role:'assistant',content:'',status:'pending',model:settings.value.model,created_at:new Date().toISOString(),updated_at:new Date().toISOString()}
  messages.value.push(assistant);await saveMessage(assistant,false)
  busy.value=true;controller=new AbortController();await scrollBottom()
@@ -82,7 +83,7 @@ watch(activeId,async id=>{if(id)messages.value=await listMessages(id)})
  <div v-if="showSettings" class="modal-backdrop" @click.self="showSettings=false"><section class="settings-modal"><div class="modal-heading"><div><span class="eyebrow">CONFIGURATION</span><h2>模型与同步设置</h2></div><button class="close" @click="showSettings=false">×</button></div>
   <label>OpenAI-compatible API Endpoint<input v-model="settings.endpoint" placeholder="https://api.deepseek.com/chat/completions"></label>
   <label>模型名称<input v-model="settings.model" placeholder="deepseek-chat"></label>
-  <label>API Key<input v-model="settings.apiKey" type="password" placeholder="仅保存在本机设置文件（当前版本未加密）"></label>
+  <label>API Key<input v-model="settings.apiKey" type="password" placeholder="仅保存在本机设置文件（当前版本未加密）；本地 Ollama 可不填 Key"></label>
   <div class="settings-divider"></div><p class="settings-note">跨设备同步（可选）。留空时完全本地运行；配置同步服务后，将通过 HTTPS 同步消息。</p>
   <label>Sync API URL<input v-model="settings.syncUrl" placeholder="https://your-sync-service.example.com"></label>
   <label>Sync Token<input v-model="settings.syncToken" type="password" placeholder="同步服务 Bearer Token"></label>
