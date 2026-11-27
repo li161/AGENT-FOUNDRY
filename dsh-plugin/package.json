@@ -26,5 +26,15 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.2.0-alpha.1",
     "@deepseek-ai/dsh-tools": "0.2.3-alpha.2"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.2.0-alpha.1",
+    "@deepseek-ai/dsh-tools": "0.2.3-alpha.2",
+    "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.5",
+    "typescript": "^5.9.3"
   }
 }
