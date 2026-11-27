@@ -1,7 +1,10 @@
 import type { Message } from './db'
 export async function* streamChat(endpoint: string, apiKey: string, model: string, messages: Message[], signal: AbortSignal) {
-  if (!apiKey.trim()) throw new Error('请先在设置中填写模型 API Key')
-  const response=await fetch(endpoint,{method:'POST',signal,headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+  const localHost = (() => { try { const host = new URL(endpoint).hostname; return host === 'localhost' || host === '127.0.0.1' || host === '::1' } catch { return false } })()
+  if (!apiKey.trim() && !localHost) throw new Error('云端模型需要 API Key；本地 Ollama 地址可以留空')
+  const headers: Record<string,string> = { 'Content-Type':'application/json' }
+  if (apiKey.trim()) headers.Authorization = `Bearer ${apiKey}`
+  const response=await fetch(endpoint,{method:'POST',signal,headers,
     body:JSON.stringify({model,stream:true,messages:messages.map(m=>({role:m.role,content:m.content}))})})
   if(!response.ok) throw new Error(`模型请求失败 (${response.status}): ${(await response.text()).slice(0,500)}`)
   if(!response.body) throw new Error('当前响应不支持流式读取')
