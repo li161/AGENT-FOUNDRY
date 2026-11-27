@@ -24,7 +24,7 @@
     "dsh": "0.2.3-alpha.2"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "0.2.3-alpha.2",
+    "@deepseek-ai/cordis": "4.2.0-alpha.1",
     "@deepseek-ai/dsh-tools": "0.2.3-alpha.2"
   }
 }
