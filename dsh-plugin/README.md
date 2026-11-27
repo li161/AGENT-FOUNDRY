@@ -22,6 +22,7 @@ The PostgreSQL pool is explicitly closed on plugin unload.
 ## Compatibility
 
 - DeepSeek Harness: `0.2.3-alpha.2`
+- Cordis: `4.2.0-alpha.1`
 - Node.js: `^24.22.3 || >=26.13.1`
 - PostgreSQL: 14+
 
