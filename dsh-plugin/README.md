@@ -127,7 +127,7 @@ Run the existing memory/task migration, then the new conversation schema:
 
 ```bash
 psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/001_init.sql
-psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/002_conversations_sync.sql
+psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/002_conversations_sync.sql\npsql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/004_sync_idempotency.sql
 ```
 
 The desktop client schema is in `dsh-plugin/sql/003_local_sqlite.sql`. Configure SQLite with WAL mode and foreign keys enabled. The local outbox stores unsynced mutations; only remove an outbox item after the server acknowledges it.
