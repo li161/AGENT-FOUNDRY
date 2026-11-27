@@ -1,5 +1,3 @@
-# Merge this row into the web profile's cordis.patch.yml.
-# Confirm the exact loader row shape against the pinned DeepSeek Harness revision.
-plugins:
-  - id: portable-personal-agent
-    plugin: ./dsh-plugin/src/index.ts
+- insert:
+    - id: portable-personal-agent
+      name: portable-personal-agent-dsh-plugin
