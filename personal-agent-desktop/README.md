@@ -11,7 +11,7 @@ Independent desktop assistant. It does not automate or embed the ChatGPT website
 - **Optional sync:** local outbox + the existing Personal Agent Sync API. When sync URL/token are configured, queued mutations are pushed and remote changes are fetched.
 - **Secrets:** this MVP stores API and sync credentials in the local Tauri Store file. They are not yet protected by the OS keychain; use a dedicated OS account and do not share the desktop profile.
 
-The ChatGPT Free web subscription is not an API credential and cannot be consumed directly by an independent client. Use a provider's API key/free quota, or a local model runtime in a later iteration. Provider free quotas and model availability are controlled by that provider and may change.
+The ChatGPT Free web subscription is not an API credential and cannot be consumed directly by an independent client. Use a provider's API key/free quota, or run a local Ollama model. For Ollama, set endpoint to `http://localhost:11434/v1/chat/completions`, choose an installed model such as `qwen2.5:7b`, and leave API Key blank. Provider free quotas and model availability are controlled by that provider and may change.
 
 ## Prerequisites
 
