@@ -25,10 +25,10 @@ async function send(){
  if(settings.value.syncUrl) void syncNow(settings.value.syncUrl,settings.value.syncToken)
  const assistant:Message={id:newId(),conversation_id:conversationId,role:'assistant',content:'',status:'pending',model:settings.value.model,created_at:new Date().toISOString(),updated_at:new Date().toISOString()}
  messages.value.push(assistant);await saveMessage(assistant,false)
- busy.value=true;controller=new AbortController();await scrollBottom()
+ busy.value=true;await scrollBottom()
  try{
    await updateMessage(assistant.id,'','streaming',settings.value.model);assistant.status='streaming'
-   for await(const token of streamChat(settings.value.endpoint,settings.value.apiKey,settings.value.model,messages.value.filter(m=>m.id!==assistant.id),controller.signal)){
+   for await(const token of streamChat(settings.value.endpoint,settings.value.apiKey,settings.value.model,messages.value.filter(m=>m.id!==assistant.id))){
      assistant.content+=token
      await updateMessage(assistant.id,assistant.content,'streaming',settings.value.model)
      await scrollBottom()
@@ -37,12 +37,12 @@ async function send(){
    await saveMessage(assistant)
    status.value='已保存到本地'
  }catch(e){
-   assistant.status=controller.signal.aborted?'interrupted':'failed'
+   assistant.status='failed'
    assistant.content=assistant.content||''
    assistant.updated_at=await updateMessage(assistant.id,assistant.content,assistant.status,settings.value.model)
    await saveMessage(assistant)
    error.value=String(e);status.value='消息已保存在本地'
- }finally{busy.value=false;controller=null;await refreshConversations();await scrollBottom();if(settings.value.syncUrl)void syncNow(settings.value.syncUrl,settings.value.syncToken)}
+ }finally{busy.value=false;await refreshConversations();await scrollBottom();if(settings.value.syncUrl)void syncNow(settings.value.syncUrl,settings.value.syncToken)}
 }
 async function saveConfig(){await writeSettings(settings.value);showSettings.value=false;status.value='设置已保存在本机'}
 function keydown(e:KeyboardEvent){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();void send()}}
