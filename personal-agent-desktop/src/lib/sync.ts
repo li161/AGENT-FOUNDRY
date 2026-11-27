@@ -1,4 +1,4 @@
-import { deleteOutbox, failOutbox, getMeta, newId, outboxBatch, setMeta } from './db'
+import { db, deleteOutbox, failOutbox, getMeta, newId, outboxBatch, setMeta } from './db'
 let syncing=false
 export async function syncNow(baseUrl: string, token: string) {
   if(syncing||!baseUrl||!token)return
