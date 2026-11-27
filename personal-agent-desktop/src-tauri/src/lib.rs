@@ -40,7 +40,7 @@ async fn chat_stream(
                 if let Ok(value) = serde_json::from_str::<serde_json::Value>(data) {
                     if let Some(token) = value["choices"][0]["delta"]["content"].as_str() {
                         if !token.is_empty() {
-                            window.emit("model-stream", serde_json::json!({"requestId":request_id,"token":token}))
+                            window.emit("model-stream", serde_json::json!({"requestId":request_id.clone(),"token":token}))
                                 .map_err(|e| format!("发送模型事件失败: {e}"))?;
                         }
                     }
@@ -48,7 +48,7 @@ async fn chat_stream(
             }
         }
     }
-    window.emit("model-stream", serde_json::json!({"requestId":request_id,"done":true}))
+    window.emit("model-stream", serde_json::json!({"requestId":request_id.clone(),"done":true}))
         .map_err(|e| format!("结束模型事件失败: {e}"))?;
     Ok(())
 }
