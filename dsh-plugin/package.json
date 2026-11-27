@@ -1,14 +1,15 @@
 {
   "name": "portable-personal-agent-dsh-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "description": "Portable Personal Agent tools for DeepSeek Harness",
   "dependencies": {
     "pg": "^8.13.1"
   },
-  "main": "src/index.ts",
+  "main": "lib/index.js",
   "files": [
+    "lib/index.js",
     "src/index.ts",
     "cordis.patch.yml",
     "README.md",
@@ -28,6 +29,8 @@
     "@deepseek-ai/dsh-tools": "0.2.3-alpha.2"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepare": "pnpm build",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
