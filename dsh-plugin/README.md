@@ -31,7 +31,17 @@ validating this plugin.
 
 ## Install into a Harness profile
 
-From the AGENT-FOUNDRY repository root, install the local bundle into a
+First install the plugin's dependencies and compile its TypeScript entry point
+to the JavaScript file loaded by the Harness runtime:
+
+```bash
+cd dsh-plugin
+pnpm install
+pnpm build
+cd ..
+```
+
+Then, from the AGENT-FOUNDRY repository root, install the local bundle into a
 profile. The Harness CLI links the package, reads its `dsh.bundle` manifest,
 and adds its Cordis patch layer:
 
@@ -42,10 +52,10 @@ dsh --profile personal-agent
 ```
 
 The dump should contain a `portable-personal-agent` layer. The bundle patch
-references `./src/index.ts` relative to the package, while the package keeps
-its own `pg` dependency and declares the Harness packages as peers plus
-development dependencies for type-checking.
-
+references the installed package by its package name; its `main` entry points
+to the compiled `lib/index.js`. The package keeps its own `pg` dependency
+and declares Harness packages as peers plus development dependencies for
+type-checking.
 ## Database setup
 
 Create a dedicated database and apply the migration before starting Harness:
@@ -101,7 +111,7 @@ live process state. It persists only explicit memories and task records.
 
 ## Verification status
 
-The source and bundle patch are committed as an integration implementation.
+The TypeScript source, compiled-JavaScript build path, bundle patch, and CI typecheck are committed as an integration implementation.
 The exact pinned Harness checkout, TypeScript build, PostgreSQL integration,
 and live model tool-call acceptance test still need to run before this can be
 called fully verified.
