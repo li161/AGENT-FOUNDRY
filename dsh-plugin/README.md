@@ -29,31 +29,22 @@ The PostgreSQL pool is explicitly closed on plugin unload.
 The Harness API is in Developer Preview. Keep the Harness version pinned while
 validating this plugin.
 
-## Load from a local source checkout
+## Install into a Harness profile
 
-From the Harness repository root, use the plugin's Cordis overlay:
-
-```yaml
-- insert:
-    - id: portable-personal-agent
-      name: /absolute/path/to/AGENT-FOUNDRY/dsh-plugin/src/index.ts
-```
-
-The checked-in `cordis.patch.yml` uses a package-relative module path for
-bundle installation. For a direct source checkout test, replace its module
-path with the absolute path above, then launch:
+From the AGENT-FOUNDRY repository root, install the local bundle into a
+profile. The Harness CLI links the package, reads its `dsh.bundle` manifest,
+and adds its Cordis patch layer:
 
 ```bash
-pnpm dsh web --patch /absolute/path/to/AGENT-FOUNDRY/dsh-plugin/cordis.patch.yml
+dsh plugin --profile personal-agent add ./dsh-plugin
+dsh --profile personal-agent --dump-config
+dsh --profile personal-agent
 ```
 
-Install the plugin's runtime dependency from `dsh-plugin` so `pg` can be
-resolved by Node:
-
-```bash
-cd /absolute/path/to/AGENT-FOUNDRY/dsh-plugin
-pnpm install
-```
+The dump should contain a `portable-personal-agent` layer. The bundle patch
+references `./src/index.ts` relative to the package, while the package keeps
+its own `pg` dependency and declares the Harness packages as peers plus
+development dependencies for type-checking.
 
 ## Database setup
 
@@ -61,7 +52,7 @@ Create a dedicated database and apply the migration before starting Harness:
 
 ```bash
 createdb personal_agent
-psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/001_init.sql
+psql "$PERSONAL_AGENT_DATABASE_URL" -v ON_ERROR_STOP=1 -f dsh-plugin/sql/001_init.sql
 ```
 
 Set these variables in the Harness host process (not browser/Vite variables):
