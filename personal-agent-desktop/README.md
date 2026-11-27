@@ -6,7 +6,7 @@ Independent desktop assistant. It does not automate or embed the ChatGPT website
 
 - **Desktop shell:** Tauri 2 + Vue 3 + TypeScript.
 - **Local source of truth:** SQLite via `tauri-plugin-sql`, with WAL enabled.
-- **Hybrid inference:** the desktop runtime calls an OpenAI-compatible cloud model endpoint. The initial default is DeepSeek Chat; configure any compatible endpoint/model in Settings.
+- **Hybrid inference:** a native Rust HTTP client calls an OpenAI-compatible cloud model endpoint and streams tokens to the Vue UI over Tauri events (no browser CORS dependency). The initial default is DeepSeek Chat; configure any compatible endpoint/model in Settings.
 - **Durability:** user message is committed to SQLite before the model request. Assistant output is saved as each stream delta arrives. A startup recovery pass marks unfinished requests as `interrupted` without deleting partial output.
 - **Optional sync:** local outbox + the existing Personal Agent Sync API. When sync URL/token are configured, queued mutations are pushed and remote changes are fetched.
 - **Secrets:** this MVP stores API and sync credentials in the local Tauri Store file. They are not yet protected by the OS keychain; use a dedicated OS account and do not share the desktop profile.
